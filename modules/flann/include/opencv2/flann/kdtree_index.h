@@ -470,7 +470,7 @@ private:
      *  at least "mindistsq".
      */
     void searchLevel(ResultSet<DistanceType>& result_set, const ElementType* vec, NodePtr node, DistanceType mindist, int& checkCount, int maxCheck,
-                     float epsError, std::unique_ptr<Heap<BranchSt>> heap, DynamicBitset& checked)
+                     float epsError, std::unique_ptr<Heap<BranchSt>> & heap, DynamicBitset& checked)
     {
         if (result_set.worstDist()<mindist) {
             //			printf("Ignoring branch, too far\n");
