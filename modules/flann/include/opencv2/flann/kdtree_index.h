@@ -35,6 +35,7 @@
 #include <map>
 #include <cassert>
 #include <cstring>
+#include <memory>
 
 #include "general.h"
 #include "nn_index.h"
@@ -242,8 +243,6 @@ private:
     typedef BranchStruct<NodePtr, DistanceType> BranchSt;
     typedef BranchSt* Branch;
 
-
-
     void save_tree(FILE* stream, NodePtr tree)
     {
         save_value(stream, *tree);
@@ -445,7 +444,10 @@ private:
         BranchSt branch;
 
         int checkCount = 0;
-        Heap<BranchSt>* heap = new Heap<BranchSt>((int)size_);
+        if (!heap || heap ->size() != size_) {
+            heap = make_unique<Heap<BranchSt>>(size_);
+        }
+
         DynamicBitset checked(size_);
 
         /* Search once through each tree down to root. */
@@ -457,8 +459,6 @@ private:
         while ( heap->popMin(branch) && (checkCount < maxCheck || !result.full() )) {
             searchLevel(result, vec, branch.node, branch.mindist, checkCount, maxCheck, epsError, heap, checked);
         }
-
-        delete heap;
 
         assert(result.full());
     }
@@ -617,6 +617,14 @@ private:
     PooledAllocator pool_;
 
     Distance distance_;
+
+    template<typename T, typename... Args>
+    std::unique_ptr<T> make_unique(Args&&... args)
+    {
+        return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+    }
+
+    thread_local std::unique_ptr<Heap<BranchSt>> heap;
 
 
 };   // class KDTreeForest
